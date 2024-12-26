@@ -8,9 +8,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.Optional;
 import java.util.HashMap;
 import java.util.Map;
+
+
+
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -55,5 +60,25 @@ public class UserService {
         }
 
         return response;
+
+    public String register(Users users) {
+        Optional<Users> existingUser = repo.findByUsername(users.getUsername());
+        if(existingUser.isPresent()){
+            return "Username already exists";
+        }
+        users.setPassword(passwordEncoder.encode(users.getPassword()));
+        repo.save(users);
+        return "User registered successfully";
+    }
+
+    public String login(String username,String password){
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username,password));
+        if(authentication.isAuthenticated()){
+
+            return "User logged in successfully " + jwtService.generateToken(username);
+        }else{
+            return "Username or password is incorrect";
+        }
+
     }
 }
